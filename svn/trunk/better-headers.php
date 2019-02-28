@@ -23,8 +23,12 @@ function better_head_send_headers() {
 
   $settings = get_option('better-headers-settings');
 
-  if($settings['better-headers-xcto']==="YES") {
+  //Miscellaneous
+  if(($settings['better-headers-xcto'] ?: "")!=="") {
     header('X-Content-Type-Options: nosniff');
+  }
+  if(($settings['better-headers-rp'] ?: "")!=="") {
+    header('Referrer-Policy: ' . $settings['better-headers-rp']);
   }
 }
 
@@ -43,13 +47,16 @@ function better_head_menus() {
 //add the settings
 function better_head_settings() {
 	register_setting('better-headers','better-headers-settings');
+
 	add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
 	add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
+	add_settings_field('better-headers-rp', __('Referrer Policy', 'better-head-text'), 'better_head_rp', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
 add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
+  $whitelist_options['better-headers'][] = 'better-headers-rp';
   return $whitelist_options;
 });
 
@@ -80,6 +87,27 @@ function better_head_xcto() {
 	$settings = get_option('better-headers-settings');
 	$checked = ($settings['better-headers-xcto']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xcto" name="better-headers-settings[better-headers-xcto]" type="checkbox" value="YES"' . $checked . '> Protect against Content Sniffing attacks by setting <b>X-Content-Type-Options</b>';
+}
+
+//defined output for settings
+function better_head_rp() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-passwords-rp'] ?: "");
+  echo '<select id="better-headers-rp" name="better-headers-settings[better-headers-rp]">';
+  echo better_head_rp_option('',$value,'-- Not set --');
+  echo better_head_rp_option('no-referrer',$value,'Never send referrer (no-referrer)');
+  echo better_head_rp_option('no-referrer-when-downgrade',$value,'Don\'t send referrer when going from HTTPS to HTTP (no-referrer-when-downgrade)');
+  echo better_head_rp_option('origin',$value,'Only send the domain of the referrer (origin)');
+  echo better_head_rp_option('origin-when-cross-origin',$value,'Send referrer within this domain but only send the domain to other domains (origin-when-cross-origin)');
+  echo better_head_rp_option('same-origin',$value,'Send referrer within this domain but don\'t send referrer to other domains (same-origin)');
+  echo better_head_rp_option('strict-origin',$value,'Don\'t send domain of the referrer when going from HTTPS to HTTP (strict-origin)');
+  echo better_head_rp_option('strict-origin-when-cross-origin',$value,'Send referrer within this domain, only send the domain to other domains unless going from HTTPS to HTTP (strict-origin-when-cross-origin)');
+  echo better_head_rp_option('unsafe-url',$value,'Always send referrer (unsafe-url) - not recommended!');
+  echo '</select>';
+}
+
+function better_head_rp_option($opt,$val,$txt) {
+  return '  <option value=" ' . $opt . '"' . ($opt===$val ? '" selected' : '') . '>' . $txt . '</option>';
 }
 
 //add actions
