@@ -43,8 +43,8 @@ function better_head_menus() {
 //add the settings
 function better_head_settings() {
 	register_setting('better-headers','better-headers-settings');
-	add_settings_section('better-headers-section', __('Content Type Options', 'better-head-text'), 'better_head_section', 'better-headers');
-	add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section');
+	add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
+	add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
@@ -71,7 +71,7 @@ function better_head_show_settings() {
 }
 
 //define output for settings section
-function better_head_section() {
+function better_head_section_misc() {
   // No output required for section
 }
 
@@ -79,7 +79,7 @@ function better_head_section() {
 function better_head_xcto() {
 	$settings = get_option('better-headers-settings');
 	$checked = ($settings['better-headers-xcto']==="YES" ? " checked" : "");
-  echo '<input id="better-headers-xcto" name="better-headers-settings[better-headers-xcto]" type="checkbox" value="YES"' . $checked . '>';
+  echo '<label><input id="better-headers-xcto" name="better-headers-settings[better-headers-xcto]" type="checkbox" value="YES"' . $checked . '> Protect against Content Sniffing attacks by setting <b>X-Content-Type-Options</b>';
 }
 
 //add actions
