@@ -23,26 +23,13 @@ function better_head_send_headers() {
 
   $settings = get_option('better-headers-settings');
 
-  //Referrer Policy
-  if(($settings['better-headers-rp-down'] ?: "")!=="" || ($settings['better-headers-rp-cros'] ?: "")!=="" || ($settings['better-headers-rp-same'] ?: "")!=="") {
-    $value = better_head_calc_rp($settings);
-    if($value!=="") {
-      header('Referrer-Policy: ' . $value);
-    }
-  }
-
   //Miscellaneous
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     header('X-Content-Type-Options: nosniff');
   }
-}
-
-//calculate Referrer Policy value
-function better_head_calc_rp($settings) {
-  $value = ''; //don't send header
-
-
-  return $value;
+  if(($settings['better-headers-rp'] ?: "")!=="") {
+    header('Referrer-Policy: ' . $settings['better-headers-rp']);
+  }
 }
 
 //add actions
@@ -61,21 +48,15 @@ function better_head_menus() {
 function better_head_settings() {
 	register_setting('better-headers','better-headers-settings');
 
-	add_settings_section('better-headers-section-rp', __('Referrer Policy', 'better-head-text'), 'better_head_section_rp', 'better-headers');
-	add_settings_field('better-headers-rp-down', __('Referrer when downgrading (HTTPS -> HTTP)', 'better-head-text'), 'better_head_rp_down', 'better-headers', 'better-headers-section-rp');
-	add_settings_field('better-headers-rp-cros', __('Referrer when changing domain/site', 'better-head-text'), 'better_head_rp_cros', 'better-headers', 'better-headers-section-rp');
-	add_settings_field('better-headers-rp-same', __('Referrer for same domain/site', 'better-head-text'), 'better_head_rp_same', 'better-headers', 'better-headers-section-rp');
-
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
 	add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
+	add_settings_field('better-headers-rp', __('Referrer Policy', 'better-head-text'), 'better_head_rp', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
 add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
-  $whitelist_options['better-headers'][] = 'better-headers-rp-down';
-  $whitelist_options['better-headers'][] = 'better-headers-rp-cros';
-  $whitelist_options['better-headers'][] = 'better-headers-rp-same';
+  $whitelist_options['better-headers'][] = 'better-headers-rp';
   return $whitelist_options;
 });
 
@@ -103,20 +84,17 @@ function better_head_show_settings() {
   $settings = get_option('better-headers-settings');
   $boo = false;
 
-  if(($settings['better-headers-rp-down'] ?: "")!=="" || ($settings['better-headers-rp-cros'] ?: "")!=="" || ($settings['better-headers-rp-same'] ?: "")!=="") {
-    $value = better_head_calc_rp($settings);
-    if($value!=="") {
-      echo '      <tr>';
-      echo '        <th scope="row">Referrer-Policy</th>';
-      echo '        <td>' . $value . '</td>';
-      echo '      </tr>';
-      $boo = true;
-    }
-  }
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     echo '      <tr>';
     echo '        <th scope="row">X-Content-Type-Options</th>';
     echo '        <td>nosniff</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
+  if(($settings['better-headers-rp'] ?: "")!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">Referrer-Policy</th>';
+    echo '        <td>' . $settings['better-headers-rp'] . '</td>';
     echo '      </tr>';
     $boo = true;
   }
@@ -137,41 +115,21 @@ function better_head_section_rp() {
 }
 
 //defined output for settings
-function better_head_rp_down() {
+function better_head_rp() {
 	$settings = get_option('better-headers-settings');
-	$value = ($settings['better-passwords-rp-down'] ?: "");
-  echo '<select id="better-headers-rp-down" name="better-headers-settings[better-headers-rp-down]">';
-  echo better_head_rp_option('',$value,'-- Not set --');
-  echo better_head_rp_option('N',$value,'Nothing (no referrer)');
-  echo better_head_rp_option('O',$value,'Origin (domain only)');
-  echo better_head_rp_option('F',$value,'Full (whole URL)');
-  echo '</select>';
-}
-
-function better_head_rp_cros() {
-	$settings = get_option('better-headers-settings');
-	$value = ($settings['better-passwords-rp-cros'] ?: "");
-  echo '<select id="better-headers-rp-cros" name="better-headers-settings[better-headers-rp-cros]">';
-  echo better_head_rp_option('',$value,'-- Not set --');
-  echo better_head_rp_option('N',$value,'Nothing (no referrer)');
-  echo better_head_rp_option('O',$value,'Origin (domain only)');
-  echo better_head_rp_option('F',$value,'Full (whole URL)');
-  echo '</select>';
-}
-
-function better_head_rp_same() {
-	$settings = get_option('better-headers-settings');
-	$value = ($settings['better-passwords-rp-same'] ?: "");
-  echo '<select id="better-headers-rp-same" name="better-headers-settings[better-headers-rp-same]">';
-  echo better_head_rp_option('',$value,'-- Not set --');
-  echo better_head_rp_option('N',$value,'Nothing (no referrer)');
-  echo better_head_rp_option('O',$value,'Origin (domain only)');
-  echo better_head_rp_option('F',$value,'Full (whole URL)');
-  echo '</select>';
+	$value = ($settings['better-headers-rp'] ?: "");
+  echo better_head_rp_option('',$value,'-- Not set -- ');
+  echo better_head_rp_option('no-referrer',$value,'No referrer information should be sent along with requests');
+  echo better_head_rp_option('no-referrer-when-downgrade',$value,'The full URL should be sent as the referrer when the protocol security level stays the same (HTTP→HTTP, HTTPS→HTTPS), but not sent to a less secure destination (HTTPS→HTTP)');
+  echo better_head_rp_option('origin',$value,'The origin of the document should be sent as the referrer in all cases (eg. the domain only)');
+  echo better_head_rp_option('origin-when-cross-origin',$value,'The full URL should be sent when performing a same-origin request, but only send the origin of the document for cross-site requests');
+  echo better_head_rp_option('same-origin',$value,'The full URL should be sent when performing a same-origin request, but no referrer information for cross-site requests');
+  echo better_head_rp_option('strict-origin',$value,'The origin of the document should be sent as the referrer when the protocol security level stays the same (HTTPS→HTTPS), but not sent to a less secure destination (HTTPS→HTTP)');
+  echo better_head_rp_option('strict-origin-when-cross-origin',$value,'The full URL should be sent when performing a same-origin request, send the origin only for cross-site requests when the protocol security level stays the same (HTTPS→HTTPS), and send no referrer information to a less secure destination (HTTPS→HTTP)');
 }
 
 function better_head_rp_option($opt,$val,$txt) {
-  return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
+  return '<label><input type="radio" id="better-headers-rp' . $opt . '" name="better-headers-settings[better-headers-rp]" value="' . $opt . '"' . ($opt===$val ? ' checked' : '') . '>&nbsp; ' . $txt . '</label><br><br>';
 }
 
 //define output for settings section
