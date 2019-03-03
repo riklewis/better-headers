@@ -35,6 +35,9 @@ function better_head_send_headers() {
   if(($settings['better-headers-xfo'] ?: "")!=="") {
     header('X-Frame-Options: sameorigin');
   }
+  if(($settings['better-headers-xxp'] ?: "")!=="") {
+    header('X-XSS-Protection: 1; mode=block');
+  }
 }
 
 //add actions
@@ -59,6 +62,7 @@ function better_head_settings() {
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
   add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xfo', __('Frame Options', 'better-head-text'), 'better_head_xfo', 'better-headers', 'better-headers-section-misc');
+	add_settings_field('better-headers-xxp', __('Cross Site Scripting Protection', 'better-head-text'), 'better_head_xxp', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
@@ -66,6 +70,7 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-rp';
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
+  $whitelist_options['better-headers'][] = 'better-headers-xxp';
   return $whitelist_options;
 });
 
@@ -114,6 +119,13 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
+  if(($settings['better-headers-xxp'] ?: "")!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">X-XSS-Protection</th>';
+    echo '        <td>1; mode=block</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
 
   if(!$boo) {
     echo '      <tr>';
@@ -134,7 +146,7 @@ function better_head_section_rp() {
 function better_head_rp() {
 	$settings = get_option('better-headers-settings');
 	$value = ($settings['better-headers-rp'] ?: "");
-  echo '<p>Protect against informationlLeakage by setting the <strong>Referrer-Policy</strong> header:</p><br>';
+  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p><br>';
   echo better_head_rp_option('',$value,'-- Not set -- ');
   echo better_head_rp_option('no-referrer',$value,'No referrer information should be sent along with requests');
   echo better_head_rp_option('no-referrer-when-downgrade',$value,'The full URL should be sent as the referrer when the protocol security level stays the same (HTTP→HTTP, HTTPS→HTTPS), but not sent to a less secure destination (HTTPS→HTTP)');
@@ -165,6 +177,13 @@ function better_head_xfo() {
   $settings = get_option('better-headers-settings');
   $checked = ($settings['better-headers-xfo']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xfo" name="better-headers-settings[better-headers-xfo]" type="checkbox" value="YES"' . $checked . '> Protect against clickjacking attacks by setting the <strong>X-Frame-Options</strong> header';
+}
+
+//defined output for settings
+function better_head_xxp() {
+  $settings = get_option('better-headers-settings');
+  $checked = ($settings['better-headers-xxp']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-xxp" name="better-headers-settings[better-headers-xxp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site scripting attacks by setting the <strong>X-XSS-Protection</strong> header';
 }
 
 //add actions
