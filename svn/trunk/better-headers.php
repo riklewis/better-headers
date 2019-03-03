@@ -28,6 +28,11 @@ function better_head_send_headers() {
     header('Referrer-Policy: ' . $settings['better-headers-rp']);
   }
 
+  //Feature Policy
+  if(($settings['better-headers-fp'] ?: "")!=="") {
+    header('Feature-Policy: ' . $settings['better-headers-fp']); //todo
+  }
+
   //Miscellaneous
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     header('X-Content-Type-Options: nosniff');
@@ -59,6 +64,18 @@ function better_head_settings() {
   add_settings_section('better-headers-section-rp', __('Referrer Policy', 'better-head-text'), 'better_head_section_rp', 'better-headers');
   add_settings_field('better-headers-rp', __('Referrer Policy', 'better-head-text'), 'better_head_rp', 'better-headers', 'better-headers-section-rp');
 
+  add_settings_section('better-headers-section-fp', __('Feature Policy', 'better-head-text'), 'better_head_section_fp', 'better-headers');
+  add_settings_field('better-headers-fp-ap', __('Autoplay', 'better-head-text'), 'better_head_fp_ap', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-cam', __('Camera', 'better-head-text'), 'better_head_fp_cam', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-dd', __('Document Domain', 'better-head-text'), 'better_head_fp_dd', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-em', __('Encrypted Media', 'better-head-text'), 'better_head_fp_em', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-fs', __('Fullscreen', 'better-head-text'), 'better_head_fp_fs', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-geo', __('Geolocation', 'better-head-text'), 'better_head_fp_geo', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-mic', __('Microphone', 'better-head-text'), 'better_head_fp_mic', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-mid', __('Midi', 'better-head-text'), 'better_head_fp_mid', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-pay', __('Payment Request', 'better-head-text'), 'better_head_fp_pay', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-vr', __('Virtual Reality', 'better-head-text'), 'better_head_fp_vr', 'better-headers', 'better-headers-section-fp');
+
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
   add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xfo', __('Frame Options', 'better-head-text'), 'better_head_xfo', 'better-headers', 'better-headers-section-misc');
@@ -68,6 +85,16 @@ function better_head_settings() {
 //allow the settings to be stored
 add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-rp';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-ap';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-cam';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-dd';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-em';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-fs';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-geo';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-mic';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-mid';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-pay';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-vr';
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
   $whitelist_options['better-headers'][] = 'better-headers-xxp';
@@ -105,6 +132,7 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
+  //todo
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     echo '      <tr>';
     echo '        <th scope="row">X-Content-Type-Options</th>';
@@ -158,6 +186,27 @@ function better_head_rp() {
 }
 function better_head_rp_option($opt,$val,$txt) {
   return '<label><input type="radio" id="better-headers-rp' . $opt . '" name="better-headers-settings[better-headers-rp]" value="' . $opt . '"' . ($opt===$val ? ' checked' : '') . '>&nbsp; ' . $txt . '</label><br><br>';
+}
+
+//define output for settings section
+function better_head_section_fp() {
+  echo '<hr>';
+  echo '<p>Protect against feature misuse by setting the <strong>Feature-Policy</strong> header:</p><br>';
+}
+
+//defined output for settings
+function better_head_fp_ap() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-ap'] ?: "");
+  $html  = '<select id="better-headers-fp-ap" name="better-headers-settings[better-headers-fp-ap]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+}
+//todo
+function better_head_fp_option($opt,$val,$txt) {
+  return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
 }
 
 //define output for settings section
