@@ -29,8 +29,9 @@ function better_head_send_headers() {
   }
 
   //Feature Policy
-  if(($settings['better-headers-fp'] ?: "")!=="") {
-    header('Feature-Policy: ' . $settings['better-headers-fp']); //todo
+  $fp = better_head_calc_fp($settings);
+  if($fp!=="") {
+    header('Feature-Policy: ' . $fp);
   }
 
   //Miscellaneous
@@ -43,6 +44,27 @@ function better_head_send_headers() {
   if(($settings['better-headers-xxp'] ?: "")!=="") {
     header('X-XSS-Protection: 1; mode=block');
   }
+}
+
+function better_head_calc_fp($settings) {
+  $fp = "";
+  if(($settings['better-headers-fp-ap'] ?: "")!=="") $fp .= "; autoplay " . better_head_fp_value($settings['better-headers-fp-ap']);
+  if(($settings['better-headers-fp-cam'] ?: "")!=="") $fp .= "; camera " . better_head_fp_value($settings['better-headers-fp-cam']);
+  if(($settings['better-headers-fp-dd'] ?: "")!=="") $fp .= "; document-domain " . better_head_fp_value($settings['better-headers-fp-dd']);
+  if(($settings['better-headers-fp-em'] ?: "")!=="") $fp .= "; encrypted-media " . better_head_fp_value($settings['better-headers-fp-em']);
+  if(($settings['better-headers-fp-fs'] ?: "")!=="") $fp .= "; fullscreen " . better_head_fp_value($settings['better-headers-fp-fs']);
+  if(($settings['better-headers-fp-geo'] ?: "")!=="") $fp .= "; geolocation " . better_head_fp_value($settings['better-headers-fp-geo']);
+  if(($settings['better-headers-fp-mic'] ?: "")!=="") $fp .= "; microphone " . better_head_fp_value($settings['better-headers-fp-mic']);
+  if(($settings['better-headers-fp-mid'] ?: "")!=="") $fp .= "; midi " . better_head_fp_value($settings['better-headers-fp-mid']);
+  if(($settings['better-headers-fp-pay'] ?: "")!=="") $fp .= "; payment " . better_head_fp_value($settings['better-headers-fp-pay']);
+  if(($settings['better-headers-fp-vr'] ?: "")!=="") $fp .= "; vr " . better_head_fp_value($settings['better-headers-fp-vr']);
+  return (substr($fp,2) ?: "");
+}
+function better_head_fp_value($value) {
+  if($value==="all") {
+    return "*";
+  }
+  return "'" . $value . "'";
 }
 
 //add actions
@@ -132,7 +154,14 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
-  //todo
+  $fp = better_head_calc_fp($settings);
+  if($fp!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">Feature-Policy</th>';
+    echo '        <td>' . $fp . '</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     echo '      <tr>';
     echo '        <th scope="row">X-Content-Type-Options</th>';
@@ -191,20 +220,110 @@ function better_head_rp_option($opt,$val,$txt) {
 //define output for settings section
 function better_head_section_fp() {
   echo '<hr>';
-  echo '<p>Protect against feature misuse by setting the <strong>Feature-Policy</strong> header:</p><br>';
+  echo '<p>Protect against feature misuse by setting the <strong>Feature-Policy</strong> header. If this site isn\'t using the following features then it is best to disable them:</p>';
+  echo '<p><a href="javascript:jQuery(\'select.better-headers-fp\').val(\'\');">Unset all</a> - <a href="javascript:jQuery(\'select.better-headers-fp\').val(\'none\');">Disable all</a> - <a href="javascript:jQuery(\'select.better-headers-fp\').val(\'self\');">Enable all (this domain only)</a> - <a href="javascript:jQuery(\'select.better-headers-fp\').val(\'all\');">Enable all (all domains)</a></p>';
 }
 
 //defined output for settings
 function better_head_fp_ap() {
 	$settings = get_option('better-headers-settings');
 	$value = ($settings['better-headers-fp-ap'] ?: "");
-  $html  = '<select id="better-headers-fp-ap" name="better-headers-settings[better-headers-fp-ap]">';
+  echo '<select class="better-headers-fp" id="better-headers-fp-ap" name="better-headers-settings[better-headers-fp-ap]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_cam() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-cam'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-cam" name="better-headers-settings[better-headers-fp-cam]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_dd() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-dd'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-dd" name="better-headers-settings[better-headers-fp-dd]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_em() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-em'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-em" name="better-headers-settings[better-headers-fp-em]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_fs() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-fs'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-fs" name="better-headers-settings[better-headers-fp-fs]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_geo() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-geo'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-geo" name="better-headers-settings[better-headers-fp-geo]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_mic() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-mic'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-mic" name="better-headers-settings[better-headers-fp-mic]">';
   echo better_head_fp_option('',$value,'-- Not set -- ');
   echo better_head_fp_option('none',$value,'Disabled');
   echo better_head_fp_option('self',$value,'Enabled (this domain only)');
   echo better_head_fp_option('all',$value,'Enabled (all domains)');
 }
-//todo
+function better_head_fp_mid() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-mid'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-mid" name="better-headers-settings[better-headers-fp-mid]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_pay() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-pay'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-pay" name="better-headers-settings[better-headers-fp-pay]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_vr() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-vr'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-vr" name="better-headers-settings[better-headers-fp-vr]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
 function better_head_fp_option($opt,$val,$txt) {
   return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
 }
