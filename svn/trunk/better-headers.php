@@ -64,6 +64,8 @@ function better_head_calc_fp($settings) {
   if(($settings['better-headers-fp-oi'] ?: "")!=="") $fp .= "; oversized-images " . better_head_fp_value($settings['better-headers-fp-oi']);
   if(($settings['better-headers-fp-pay'] ?: "")!=="") $fp .= "; payment " . better_head_fp_value($settings['better-headers-fp-pay']);
   if(($settings['better-headers-fp-sp'] ?: "")!=="") $fp .= "; speaker " . better_head_fp_value($settings['better-headers-fp-sp']);
+  if(($settings['better-headers-fp-usb'] ?: "")!=="") $fp .= "; usb " . better_head_fp_value($settings['better-headers-fp-usb']);
+  if(($settings['better-headers-fp-vib'] ?: "")!=="") $fp .= "; vibrate " . better_head_fp_value($settings['better-headers-fp-vib']);
   if(($settings['better-headers-fp-vr'] ?: "")!=="") $fp .= "; vr " . better_head_fp_value($settings['better-headers-fp-vr']);
   return (substr($fp,2) ?: "");
 }
@@ -110,6 +112,8 @@ function better_head_settings() {
   add_settings_field('better-headers-fp-oi', __('Oversized Images', 'better-head-text'), 'better_head_fp_oi', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-pay', __('Payment Request', 'better-head-text'), 'better_head_fp_pay', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-sp', __('Speaker', 'better-head-text'), 'better_head_fp_sp', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-usb', __('USB', 'better-head-text'), 'better_head_fp_usb', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-vib', __('Vibrate', 'better-head-text'), 'better_head_fp_vib', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-vr', __('Virtual Reality', 'better-head-text'), 'better_head_fp_vr', 'better-headers', 'better-headers-section-fp');
 
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
@@ -137,6 +141,8 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-fp-oi';
   $whitelist_options['better-headers'][] = 'better-headers-fp-pay';
   $whitelist_options['better-headers'][] = 'better-headers-fp-sp';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-usb';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-vib';
   $whitelist_options['better-headers'][] = 'better-headers-fp-vr';
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
@@ -397,6 +403,26 @@ function better_head_fp_sp() {
 	$settings = get_option('better-headers-settings');
 	$value = ($settings['better-headers-fp-sp'] ?: "");
   echo '<select class="better-headers-fp" id="better-headers-fp-sp" name="better-headers-settings[better-headers-fp-sp]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_usb() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-usb'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-usb" name="better-headers-settings[better-headers-fp-usb]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_vib() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-vib'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-vib" name="better-headers-settings[better-headers-fp-vib]">';
   echo better_head_fp_option('',$value,'-- Not set -- ');
   echo better_head_fp_option('none',$value,'Disabled');
   echo better_head_fp_option('self',$value,'Enabled (this domain only)');
