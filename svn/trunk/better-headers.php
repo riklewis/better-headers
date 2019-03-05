@@ -56,6 +56,8 @@ function better_head_calc_fp($settings) {
   if(($settings['better-headers-fp-em'] ?: "")!=="") $fp .= "; encrypted-media " . better_head_fp_value($settings['better-headers-fp-em']);
   if(($settings['better-headers-fp-fs'] ?: "")!=="") $fp .= "; fullscreen " . better_head_fp_value($settings['better-headers-fp-fs']);
   if(($settings['better-headers-fp-geo'] ?: "")!=="") $fp .= "; geolocation " . better_head_fp_value($settings['better-headers-fp-geo']);
+  if(($settings['better-headers-fp-gy'] ?: "")!=="") $fp .= "; gyroscope " . better_head_fp_value($settings['better-headers-fp-gy']);
+  if(($settings['better-headers-fp-lif'] ?: "")!=="") $fp .= "; legacy-image-formats " . better_head_fp_value($settings['better-headers-fp-lif']);
   if(($settings['better-headers-fp-mic'] ?: "")!=="") $fp .= "; microphone " . better_head_fp_value($settings['better-headers-fp-mic']);
   if(($settings['better-headers-fp-mid'] ?: "")!=="") $fp .= "; midi " . better_head_fp_value($settings['better-headers-fp-mid']);
   if(($settings['better-headers-fp-pay'] ?: "")!=="") $fp .= "; payment " . better_head_fp_value($settings['better-headers-fp-pay']);
@@ -97,6 +99,8 @@ function better_head_settings() {
   add_settings_field('better-headers-fp-em', __('Encrypted Media', 'better-head-text'), 'better_head_fp_em', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-fs', __('Fullscreen', 'better-head-text'), 'better_head_fp_fs', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-geo', __('Geolocation', 'better-head-text'), 'better_head_fp_geo', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-gy', __('Gyroscope', 'better-head-text'), 'better_head_fp_gy', 'better-headers', 'better-headers-section-fp');
+  add_settings_field('better-headers-fp-lif', __('Legacy Image Formats', 'better-head-text'), 'better_head_fp_lif', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-mic', __('Microphone', 'better-head-text'), 'better_head_fp_mic', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-mid', __('Midi', 'better-head-text'), 'better_head_fp_mid', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-pay', __('Payment Request', 'better-head-text'), 'better_head_fp_pay', 'better-headers', 'better-headers-section-fp');
@@ -119,6 +123,8 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-fp-em';
   $whitelist_options['better-headers'][] = 'better-headers-fp-fs';
   $whitelist_options['better-headers'][] = 'better-headers-fp-geo';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-gy';
+  $whitelist_options['better-headers'][] = 'better-headers-fp-lif';
   $whitelist_options['better-headers'][] = 'better-headers-fp-mic';
   $whitelist_options['better-headers'][] = 'better-headers-fp-mid';
   $whitelist_options['better-headers'][] = 'better-headers-fp-pay';
@@ -310,6 +316,25 @@ function better_head_fp_geo() {
   echo better_head_fp_option('self',$value,'Enabled (this domain only)');
   echo better_head_fp_option('all',$value,'Enabled (all domains)');
   echo '</select>';
+}
+function better_head_fp_gy() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-gy'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-gy" name="better-headers-settings[better-headers-fp-gy]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
+  echo '</select>';
+}
+function better_head_fp_lif() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-fp-lif'] ?: "");
+  echo '<select class="better-headers-fp" id="better-headers-fp-lif" name="better-headers-settings[better-headers-fp-lif]">';
+  echo better_head_fp_option('',$value,'-- Not set -- ');
+  echo better_head_fp_option('none',$value,'Disabled');
+  echo better_head_fp_option('self',$value,'Enabled (this domain only)');
+  echo better_head_fp_option('all',$value,'Enabled (all domains)');
 }
 function better_head_fp_mic() {
 	$settings = get_option('better-headers-settings');
