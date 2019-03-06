@@ -233,13 +233,13 @@ function better_head_show_settings() {
 //define output for settings section
 function better_head_section_rp() {
   echo '<hr>';
+  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p>';  
 }
 
 //defined output for settings
 function better_head_rp() {
 	$settings = get_option('better-headers-settings');
 	$value = ($settings['better-headers-rp'] ?: "");
-  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p><br>';
   echo better_head_rp_option('',$value,'-- Not set -- ');
   echo better_head_rp_option('no-referrer',$value,'No referrer information should be sent along with requests');
   echo better_head_rp_option('no-referrer-when-downgrade',$value,'The full URL should be sent as the referrer when the protocol security level stays the same (HTTP→HTTP, HTTPS→HTTPS), but not sent to a less secure destination (HTTPS→HTTP)');
