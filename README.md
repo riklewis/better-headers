@@ -12,3 +12,5 @@ Headers that can be set include...
 * X-Frame-Options
 * X-Content-Type-Options
 * X-XSS-Protection   
+* X-Permitted-Cross-Domain-Policies
+* Expect-CT

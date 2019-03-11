@@ -39,6 +39,12 @@ function better_head_send_headers() {
     @header('Strict-Transport-Security: ' . $hsts);
   }
 
+  //Expect Certificate Transparency
+  $ect = better_head_calc_ect($settings);
+  if($ect!=="") {
+    @header('Expect-CT: ' . $ect);
+  }
+
   //Miscellaneous
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     @header('X-Content-Type-Options: nosniff');
@@ -89,18 +95,28 @@ function better_head_fp_value($value) {
 function better_head_calc_hsts($settings) {
   $hsts = "";
   if(($settings['better-headers-hsts'] ?: "")!=="") {
-    $maxage = ($settings['better-headers-hsts-age'] ?: "");
-    if($maxage!=="") {
-      $hsts = "max-age=" . ($maxage*60*60*24*30);
-      if(($settings['better-headers-hsts-sub'] ?: "")!=="") {
-        $hsts .= "; includeSubDomains";
-        if(($settings['better-headers-hsts-pre'] ?: "")!=="") {
-          $hsts .= "; preload";
-        }
+    $maxage = ($settings['better-headers-hsts-age'] ?: "0");
+    $hsts = "max-age=" . ($maxage*60*60*24*30);
+    if(($settings['better-headers-hsts-sub'] ?: "")!=="") {
+      $hsts .= "; includeSubDomains";
+      if(($settings['better-headers-hsts-pre'] ?: "")!=="") {
+        $hsts .= "; preload";
       }
     }
   }
   return $hsts;
+}
+
+function better_head_calc_ect($settings) {
+  $ect = "";
+  if(($settings['better-headers-ect'] ?: "")!=="") {
+    $maxage = ($settings['better-headers-ect-age'] ?: "0");
+    $ect = "max-age=" . ($maxage*60*60*24*30);
+    if(($settings['better-headers-ect-enf'] ?: "")!=="") {
+      $ect .= "; enforce";
+    }
+  }
+  return $ect;
 }
 
 //add actions
@@ -157,6 +173,11 @@ function better_head_settings() {
   add_settings_field('better-headers-hsts-sub', __('Include Subdomains', 'better-head-text'), 'better_head_hsts_sub', 'better-headers', 'better-headers-section-hsts');
   add_settings_field('better-headers-hsts-pre', __('Allow Preload', 'better-head-text'), 'better_head_hsts_pre', 'better-headers', 'better-headers-section-hsts');
 
+  add_settings_section('better-headers-section-ect', __('Expect Certificate Transparency', 'better-head-text'), 'better_head_section_ect', 'better-headers');
+  add_settings_field('better-headers-ect', __('Enable', 'better-head-text'), 'better_head_ect', 'better-headers', 'better-headers-section-ect');
+  add_settings_field('better-headers-ect-age', __('Maximum Age', 'better-head-text'), 'better_head_ect_age', 'better-headers', 'better-headers-section-ect');
+  add_settings_field('better-headers-ect-enf', __('Enforce', 'better-head-text'), 'better_head_ect_enf', 'better-headers', 'better-headers-section-ect');
+
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
   add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xfo', __('Frame Options', 'better-head-text'), 'better_head_xfo', 'better-headers', 'better-headers-section-misc');
@@ -193,6 +214,9 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-hsts-age';
   $whitelist_options['better-headers'][] = 'better-headers-hsts-sub';
   $whitelist_options['better-headers'][] = 'better-headers-hsts-pre';
+  $whitelist_options['better-headers'][] = 'better-headers-ect';
+  $whitelist_options['better-headers'][] = 'better-headers-ect-age';
+  $whitelist_options['better-headers'][] = 'better-headers-ect-enf';
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
   $whitelist_options['better-headers'][] = 'better-headers-xxp';
@@ -244,6 +268,14 @@ function better_head_show_settings() {
     echo '      <tr>';
     echo '        <th scope="row">Strict-Transport-Security</th>';
     echo '        <td>' . $hsts . '</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
+  $ect = better_head_calc_ect($settings);
+  if($ect!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">Expect-CT</th>';
+    echo '        <td>' . $ect . '</td>';
     echo '      </tr>';
     $boo = true;
   }
@@ -555,7 +587,7 @@ function better_head_hsts_age() {
 	$settings = get_option('better-headers-settings');
 	$value = ($settings['better-headers-hsts-age'] ?: "");
   echo '<select class="better-headers-hsts" id="better-headers-hsts-age" name="better-headers-settings[better-headers-hsts-age]">';
-  echo better_head_hsts_option('',$value,'-- Not set -- ');
+  echo better_head_hsts_option('',$value,'Immediate');
   echo better_head_hsts_option('1',$value,'1 month');
   echo better_head_hsts_option('2',$value,'2 months');
   echo better_head_hsts_option('3',$value,'3 months');
@@ -581,6 +613,44 @@ function better_head_hsts_pre() {
 	$settings = get_option('better-headers-settings');
 	$checked = ($settings['better-headers-hsts-pre']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-hsts-pre" name="better-headers-settings[better-headers-hsts-pre]" type="checkbox" value="YES"' . $checked . '> Permit browsers to preload Strict Transport Security configuration automatically';
+}
+
+//define output for settings section
+function better_head_section_ect() {
+  echo '<hr>';
+}
+
+//defined output for settings
+function better_head_ect() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-ect']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-ect" name="better-headers-settings[better-headers-ect]" type="checkbox" value="YES"' . $checked . '> Protect against fraudulent certificates by setting the <strong>Expect-CT</strong> header';
+}
+
+//defined output for settings
+function better_head_ect_age() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-ect-age'] ?: "");
+  echo '<select class="better-headers-ect" id="better-headers-ect-age" name="better-headers-settings[better-headers-ect-age]">';
+  echo better_head_ect_option('',$value,'Immediate');
+  echo better_head_ect_option('1',$value,'1 month');
+  echo better_head_ect_option('2',$value,'2 months');
+  echo better_head_ect_option('3',$value,'3 months');
+  echo better_head_ect_option('4',$value,'4 months');
+  echo better_head_ect_option('5',$value,'5 months');
+  echo better_head_ect_option('6',$value,'6 months');
+  echo better_head_ect_option('12',$value,'12 months');
+  echo '</select>';
+}
+function better_head_ect_option($opt,$val,$txt) {
+  return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
+}
+
+//defined output for settings
+function better_head_ect_enf() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-ect-enf']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-ect-enf" name="better-headers-settings[better-headers-ect-enf]" type="checkbox" value="YES"' . $checked . '> Enforce this policy (show an error instead of a warning)';
 }
 
 //define output for settings section
