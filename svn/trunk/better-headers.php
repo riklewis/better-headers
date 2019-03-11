@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name:  Better Headers
-Description:  This is a Wordpress plugin that makes it easy to set HTTP response headers that will improve the security of your website
-Version:      1.1
+Description:  Improve the security of your website by easily setting HTTP response headers to enable browser protection
+Version:      1.2
 Author:       Better Security
 Author URI:   https://bettersecurity.co
 License:      GPL3
@@ -48,6 +48,9 @@ function better_head_send_headers() {
   }
   if(($settings['better-headers-xxp'] ?: "")!=="") {
     @header('X-XSS-Protection: 1; mode=block');
+  }
+  if(($settings['better-headers-xpcdp'] ?: "")!=="") {
+    @header('X-Permitted-Cross-Domain-Policies: none');
   }
 }
 
@@ -158,6 +161,7 @@ function better_head_settings() {
   add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xfo', __('Frame Options', 'better-head-text'), 'better_head_xfo', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xxp', __('Cross Site Scripting Protection', 'better-head-text'), 'better_head_xxp', 'better-headers', 'better-headers-section-misc');
+	add_settings_field('better-headers-xpcdp', __('Permitted Cross Domain Policies', 'better-head-text'), 'better_head_xpcdp', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
@@ -192,6 +196,7 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
   $whitelist_options['better-headers'][] = 'better-headers-xxp';
+  $whitelist_options['better-headers'][] = 'better-headers-xpcdp';
   return $whitelist_options;
 });
 
@@ -260,6 +265,13 @@ function better_head_show_settings() {
     echo '      <tr>';
     echo '        <th scope="row">X-XSS-Protection</th>';
     echo '        <td>1; mode=block</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
+  if(($settings['better-headers-xpcdp'] ?: "")!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">X-Permitted-Cross-Domain-Policies</th>';
+    echo '        <td>none</td>';
     echo '      </tr>';
     $boo = true;
   }
@@ -595,6 +607,13 @@ function better_head_xxp() {
   $settings = get_option('better-headers-settings');
   $checked = ($settings['better-headers-xxp']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xxp" name="better-headers-settings[better-headers-xxp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site scripting attacks by setting the <strong>X-XSS-Protection</strong> header';
+}
+
+//defined output for settings
+function better_head_xpcdp() {
+  $settings = get_option('better-headers-settings');
+  $checked = ($settings['better-headers-xpcdp']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-xpcdp" name="better-headers-settings[better-headers-xpcdp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site Flash attacks by setting the <strong>X-Permitted-Cross-Domain-Policies</strong> header';
 }
 
 //add actions
