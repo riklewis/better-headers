@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Better Headers
 Description:  This is a Wordpress plugin that makes it easy to set HTTP response headers that will improve the security of your website
-Version:      1.0
+Version:      1.1
 Author:       Better Security
 Author URI:   https://bettersecurity.co
 License:      GPL3
@@ -233,7 +233,7 @@ function better_head_show_settings() {
 //define output for settings section
 function better_head_section_rp() {
   echo '<hr>';
-  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p>';  
+  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p>';
 }
 
 //defined output for settings
@@ -511,6 +511,19 @@ function better_head_xxp() {
 //add actions
 add_action('admin_menu','better_head_menus');
 add_action('admin_init','better_head_settings');
+
+/*
+--------------------- Add links to plugins page ---------------------
+*/
+
+//show settings link
+function better_head_links($links) {
+	$links[] = sprintf('<a href="%s">%s</a>',admin_url('options-general.php?page=better-headers-settings'),'Settings');
+	return $links;
+}
+
+//add actions
+add_filter('plugin_action_links_'.plugin_basename(__FILE__),'better_head_links');
 
 /*
 ----------------------------- The End ------------------------------
