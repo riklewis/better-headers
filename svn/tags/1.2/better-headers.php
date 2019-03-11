@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name:  Better Headers
-Description:  This is a Wordpress plugin that makes it easy to set HTTP response headers that will improve the security of your website
-Version:      1.0
+Description:  Improve the security of your website by easily setting HTTP response headers to enable browser protection
+Version:      1.2
 Author:       Better Security
 Author URI:   https://bettersecurity.co
 License:      GPL3
@@ -20,29 +20,43 @@ defined('ABSPATH') or die('Forbidden');
 
 //send headers
 function better_head_send_headers() {
-
   $settings = get_option('better-headers-settings');
 
   //Referrer Policy
   if(($settings['better-headers-rp'] ?: "")!=="") {
-    header('Referrer-Policy: ' . $settings['better-headers-rp']);
+    @header('Referrer-Policy: ' . $settings['better-headers-rp']);
   }
 
   //Feature Policy
   $fp = better_head_calc_fp($settings);
   if($fp!=="") {
-    header('Feature-Policy: ' . $fp);
+    @header('Feature-Policy: ' . $fp);
+  }
+
+  //Strict Transport Security
+  $hsts = better_head_calc_hsts($settings);
+  if($hsts!=="") {
+    @header('Strict-Transport-Security: ' . $hsts);
+  }
+
+  //Expect Certificate Transparency
+  $ect = better_head_calc_ect($settings);
+  if($ect!=="") {
+    @header('Expect-CT: ' . $ect);
   }
 
   //Miscellaneous
   if(($settings['better-headers-xcto'] ?: "")!=="") {
-    header('X-Content-Type-Options: nosniff');
+    @header('X-Content-Type-Options: nosniff');
   }
   if(($settings['better-headers-xfo'] ?: "")!=="") {
-    header('X-Frame-Options: sameorigin');
+    @header('X-Frame-Options: sameorigin');
   }
   if(($settings['better-headers-xxp'] ?: "")!=="") {
-    header('X-XSS-Protection: 1; mode=block');
+    @header('X-XSS-Protection: 1; mode=block');
+  }
+  if(($settings['better-headers-xpcdp'] ?: "")!=="") {
+    @header('X-Permitted-Cross-Domain-Policies: none');
   }
 }
 
@@ -78,9 +92,40 @@ function better_head_fp_value($value) {
   }
   return "'" . $value . "'";
 }
+function better_head_calc_hsts($settings) {
+  $hsts = "";
+  if(($settings['better-headers-hsts'] ?: "")!=="") {
+    $maxage = ($settings['better-headers-hsts-age'] ?: "0");
+    $hsts = "max-age=" . ($maxage*60*60*24*30);
+    if(($settings['better-headers-hsts-sub'] ?: "")!=="") {
+      $hsts .= "; includeSubDomains";
+      if(($settings['better-headers-hsts-pre'] ?: "")!=="") {
+        $hsts .= "; preload";
+      }
+    }
+  }
+  return $hsts;
+}
+
+function better_head_calc_ect($settings) {
+  $ect = "";
+  if(($settings['better-headers-ect'] ?: "")!=="") {
+    $maxage = ($settings['better-headers-ect-age'] ?: "0");
+    $ect = "max-age=" . ($maxage*60*60*24*30);
+    if(($settings['better-headers-ect-enf'] ?: "")!=="") {
+      $ect .= "; enforce";
+    }
+  }
+  return $ect;
+}
 
 //add actions
-add_action('send_headers', 'better_head_send_headers');
+if(is_admin()) {
+  add_action('admin_init','better_head_send_headers');
+}
+else {
+  add_action('send_headers','better_head_send_headers');
+}
 
 /*
 ----------------------------- Settings ------------------------------
@@ -122,10 +167,22 @@ function better_head_settings() {
   add_settings_field('better-headers-fp-vib', __('Vibrate', 'better-head-text'), 'better_head_fp_vib', 'better-headers', 'better-headers-section-fp');
   add_settings_field('better-headers-fp-vr', __('Virtual Reality', 'better-head-text'), 'better_head_fp_vr', 'better-headers', 'better-headers-section-fp');
 
+  add_settings_section('better-headers-section-hsts', __('Strict Transport Security', 'better-head-text'), 'better_head_section_hsts', 'better-headers');
+  add_settings_field('better-headers-hsts', __('Enable', 'better-head-text'), 'better_head_hsts', 'better-headers', 'better-headers-section-hsts');
+  add_settings_field('better-headers-hsts-age', __('Maximum Age', 'better-head-text'), 'better_head_hsts_age', 'better-headers', 'better-headers-section-hsts');
+  add_settings_field('better-headers-hsts-sub', __('Include Subdomains', 'better-head-text'), 'better_head_hsts_sub', 'better-headers', 'better-headers-section-hsts');
+  add_settings_field('better-headers-hsts-pre', __('Allow Preload', 'better-head-text'), 'better_head_hsts_pre', 'better-headers', 'better-headers-section-hsts');
+
+  add_settings_section('better-headers-section-ect', __('Expect Certificate Transparency', 'better-head-text'), 'better_head_section_ect', 'better-headers');
+  add_settings_field('better-headers-ect', __('Enable', 'better-head-text'), 'better_head_ect', 'better-headers', 'better-headers-section-ect');
+  add_settings_field('better-headers-ect-age', __('Maximum Age', 'better-head-text'), 'better_head_ect_age', 'better-headers', 'better-headers-section-ect');
+  add_settings_field('better-headers-ect-enf', __('Enforce', 'better-head-text'), 'better_head_ect_enf', 'better-headers', 'better-headers-section-ect');
+
   add_settings_section('better-headers-section-misc', __('Miscellaneous', 'better-head-text'), 'better_head_section_misc', 'better-headers');
   add_settings_field('better-headers-xcto', __('Content Type Options', 'better-head-text'), 'better_head_xcto', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xfo', __('Frame Options', 'better-head-text'), 'better_head_xfo', 'better-headers', 'better-headers-section-misc');
 	add_settings_field('better-headers-xxp', __('Cross Site Scripting Protection', 'better-head-text'), 'better_head_xxp', 'better-headers', 'better-headers-section-misc');
+	add_settings_field('better-headers-xpcdp', __('Permitted Cross Domain Policies', 'better-head-text'), 'better_head_xpcdp', 'better-headers', 'better-headers-section-misc');
 }
 
 //allow the settings to be stored
@@ -153,9 +210,17 @@ add_filter('whitelist_options', function($whitelist_options) {
   $whitelist_options['better-headers'][] = 'better-headers-fp-usb';
   $whitelist_options['better-headers'][] = 'better-headers-fp-vib';
   $whitelist_options['better-headers'][] = 'better-headers-fp-vr';
+  $whitelist_options['better-headers'][] = 'better-headers-hsts';
+  $whitelist_options['better-headers'][] = 'better-headers-hsts-age';
+  $whitelist_options['better-headers'][] = 'better-headers-hsts-sub';
+  $whitelist_options['better-headers'][] = 'better-headers-hsts-pre';
+  $whitelist_options['better-headers'][] = 'better-headers-ect';
+  $whitelist_options['better-headers'][] = 'better-headers-ect-age';
+  $whitelist_options['better-headers'][] = 'better-headers-ect-enf';
   $whitelist_options['better-headers'][] = 'better-headers-xcto';
   $whitelist_options['better-headers'][] = 'better-headers-xfo';
   $whitelist_options['better-headers'][] = 'better-headers-xxp';
+  $whitelist_options['better-headers'][] = 'better-headers-xpcdp';
   return $whitelist_options;
 });
 
@@ -198,6 +263,22 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
+  $hsts = better_head_calc_hsts($settings);
+  if($hsts!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">Strict-Transport-Security</th>';
+    echo '        <td>' . $hsts . '</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
+  $ect = better_head_calc_ect($settings);
+  if($ect!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">Expect-CT</th>';
+    echo '        <td>' . $ect . '</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
   if(($settings['better-headers-xcto'] ?: "")!=="") {
     echo '      <tr>';
     echo '        <th scope="row">X-Content-Type-Options</th>';
@@ -219,6 +300,13 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
+  if(($settings['better-headers-xpcdp'] ?: "")!=="") {
+    echo '      <tr>';
+    echo '        <th scope="row">X-Permitted-Cross-Domain-Policies</th>';
+    echo '        <td>none</td>';
+    echo '      </tr>';
+    $boo = true;
+  }
 
   if(!$boo) {
     echo '      <tr>';
@@ -233,7 +321,7 @@ function better_head_show_settings() {
 //define output for settings section
 function better_head_section_rp() {
   echo '<hr>';
-  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p>';  
+  echo '<p>Protect against information leakage by setting the <strong>Referrer-Policy</strong> header:</p>';
 }
 
 //defined output for settings
@@ -483,6 +571,89 @@ function better_head_fp_option($opt,$val,$txt) {
 }
 
 //define output for settings section
+function better_head_section_hsts() {
+  echo '<hr>';
+}
+
+//defined output for settings
+function better_head_hsts() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-hsts']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-hsts" name="better-headers-settings[better-headers-hsts]" type="checkbox" value="YES"' . $checked . '> Protect against downgrade attacks by setting the <strong>Strict-Transport-Security</strong> header';
+}
+
+//defined output for settings
+function better_head_hsts_age() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-hsts-age'] ?: "");
+  echo '<select class="better-headers-hsts" id="better-headers-hsts-age" name="better-headers-settings[better-headers-hsts-age]">';
+  echo better_head_hsts_option('',$value,'Immediate');
+  echo better_head_hsts_option('1',$value,'1 month');
+  echo better_head_hsts_option('2',$value,'2 months');
+  echo better_head_hsts_option('3',$value,'3 months');
+  echo better_head_hsts_option('4',$value,'4 months');
+  echo better_head_hsts_option('5',$value,'5 months');
+  echo better_head_hsts_option('6',$value,'6 months');
+  echo better_head_hsts_option('12',$value,'12 months');
+  echo '</select>';
+}
+function better_head_hsts_option($opt,$val,$txt) {
+  return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
+}
+
+//defined output for settings
+function better_head_hsts_sub() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-hsts-sub']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-hsts-sub" name="better-headers-settings[better-headers-hsts-sub]" type="checkbox" value="YES"' . $checked . '> Every domain below this will inherit the same Strict Transport Security header';
+}
+
+//defined output for settings
+function better_head_hsts_pre() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-hsts-pre']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-hsts-pre" name="better-headers-settings[better-headers-hsts-pre]" type="checkbox" value="YES"' . $checked . '> Permit browsers to preload Strict Transport Security configuration automatically';
+}
+
+//define output for settings section
+function better_head_section_ect() {
+  echo '<hr>';
+}
+
+//defined output for settings
+function better_head_ect() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-ect']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-ect" name="better-headers-settings[better-headers-ect]" type="checkbox" value="YES"' . $checked . '> Protect against fraudulent certificates by setting the <strong>Expect-CT</strong> header';
+}
+
+//defined output for settings
+function better_head_ect_age() {
+	$settings = get_option('better-headers-settings');
+	$value = ($settings['better-headers-ect-age'] ?: "");
+  echo '<select class="better-headers-ect" id="better-headers-ect-age" name="better-headers-settings[better-headers-ect-age]">';
+  echo better_head_ect_option('',$value,'Immediate');
+  echo better_head_ect_option('1',$value,'1 month');
+  echo better_head_ect_option('2',$value,'2 months');
+  echo better_head_ect_option('3',$value,'3 months');
+  echo better_head_ect_option('4',$value,'4 months');
+  echo better_head_ect_option('5',$value,'5 months');
+  echo better_head_ect_option('6',$value,'6 months');
+  echo better_head_ect_option('12',$value,'12 months');
+  echo '</select>';
+}
+function better_head_ect_option($opt,$val,$txt) {
+  return '  <option value="' . $opt . '"' . ($opt===$val ? ' selected' : '') . '>' . $txt . '</option>';
+}
+
+//defined output for settings
+function better_head_ect_enf() {
+	$settings = get_option('better-headers-settings');
+	$checked = ($settings['better-headers-ect-enf']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-ect-enf" name="better-headers-settings[better-headers-ect-enf]" type="checkbox" value="YES"' . $checked . '> Enforce this policy (show an error instead of a warning)';
+}
+
+//define output for settings section
 function better_head_section_misc() {
   echo '<hr>';
 }
@@ -508,9 +679,33 @@ function better_head_xxp() {
   echo '<label><input id="better-headers-xxp" name="better-headers-settings[better-headers-xxp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site scripting attacks by setting the <strong>X-XSS-Protection</strong> header';
 }
 
+//defined output for settings
+function better_head_xpcdp() {
+  $settings = get_option('better-headers-settings');
+  $checked = ($settings['better-headers-xpcdp']==="YES" ? " checked" : "");
+  echo '<label><input id="better-headers-xpcdp" name="better-headers-settings[better-headers-xpcdp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site Flash attacks by setting the <strong>X-Permitted-Cross-Domain-Policies</strong> header';
+}
+
 //add actions
-add_action('admin_menu','better_head_menus');
-add_action('admin_init','better_head_settings');
+if(is_admin()) {
+  add_action('admin_menu','better_head_menus');
+  add_action('admin_init','better_head_settings');
+}
+
+/*
+--------------------- Add links to plugins page ---------------------
+*/
+
+//show settings link
+function better_head_links($links) {
+	$links[] = sprintf('<a href="%s">%s</a>',admin_url('options-general.php?page=better-headers-settings'),'Settings');
+	return $links;
+}
+
+//add actions
+if(is_admin()) {
+  add_filter('plugin_action_links_'.plugin_basename(__FILE__),'better_head_links');
+}
 
 /*
 ----------------------------- The End ------------------------------
