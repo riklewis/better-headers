@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Better Headers
 Description:  Improve the security of your website by easily setting HTTP response headers to enable browser protection
-Version:      1.5
+Version:      1.6
 Author:       Better Security
 Author URI:   https://bettersecurity.co
 License:      GPL3
@@ -697,14 +697,14 @@ function better_head_hsts_option($opt,$val,$txt) {
 //defined output for settings
 function better_head_hsts_sub() {
 	$settings = get_option('better-headers-settings');
-	$checked = ($settings['better-headers-hsts-sub']==="YES" ? " checked" : "");
+	$checked = (isset($settings['better-headers-hsts-sub']) && $settings['better-headers-hsts-sub']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-hsts-sub" name="better-headers-settings[better-headers-hsts-sub]" type="checkbox" value="YES"' . $checked . '> Every domain below this will inherit the same Strict Transport Security header';
 }
 
 //defined output for settings
 function better_head_hsts_pre() {
 	$settings = get_option('better-headers-settings');
-	$checked = ($settings['better-headers-hsts-pre']==="YES" ? " checked" : "");
+	$checked = (isset($settings['better-headers-hsts-pre']) && $settings['better-headers-hsts-pre']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-hsts-pre" name="better-headers-settings[better-headers-hsts-pre]" type="checkbox" value="YES"' . $checked . '> Permit browsers to preload Strict Transport Security configuration automatically';
 }
 
@@ -716,7 +716,7 @@ function better_head_section_ect() {
 //defined output for settings
 function better_head_ect() {
 	$settings = get_option('better-headers-settings');
-	$checked = ($settings['better-headers-ect']==="YES" ? " checked" : "");
+	$checked = (isset($settings['better-headers-ect']) && $settings['better-headers-ect']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-ect" name="better-headers-settings[better-headers-ect]" type="checkbox" value="YES"' . $checked . '> Protect against fraudulent certificates by setting the <strong>Expect-CT</strong> header';
 }
 
@@ -745,7 +745,7 @@ function better_head_ect_option($opt,$val,$txt) {
 //defined output for settings
 function better_head_ect_enf() {
 	$settings = get_option('better-headers-settings');
-	$checked = ($settings['better-headers-ect-enf']==="YES" ? " checked" : "");
+	$checked = (isset($settings['better-headers-ect-enf']) && $settings['better-headers-ect-enf']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-ect-enf" name="better-headers-settings[better-headers-ect-enf]" type="checkbox" value="YES"' . $checked . '> Enforce this policy (show an error instead of a warning)';
 }
 
@@ -757,28 +757,28 @@ function better_head_section_misc() {
 //defined output for settings
 function better_head_xcto() {
 	$settings = get_option('better-headers-settings');
-	$checked = ($settings['better-headers-xcto']==="YES" ? " checked" : "");
+	$checked = (isset($settings['better-headers-xcto']) && $settings['better-headers-xcto']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xcto" name="better-headers-settings[better-headers-xcto]" type="checkbox" value="YES"' . $checked . '> Protect against content sniffing attacks by setting the <strong>X-Content-Type-Options</strong> header';
 }
 
 //defined output for settings
 function better_head_xfo() {
   $settings = get_option('better-headers-settings');
-  $checked = ($settings['better-headers-xfo']==="YES" ? " checked" : "");
+  $checked = (isset($settings['better-headers-xfo']) && $settings['better-headers-xfo']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xfo" name="better-headers-settings[better-headers-xfo]" type="checkbox" value="YES"' . $checked . '> Protect against clickjacking attacks by setting the <strong>X-Frame-Options</strong> header';
 }
 
 //defined output for settings
 function better_head_xxp() {
   $settings = get_option('better-headers-settings');
-  $checked = ($settings['better-headers-xxp']==="YES" ? " checked" : "");
+  $checked = (isset($settings['better-headers-xxp']) && $settings['better-headers-xxp']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xxp" name="better-headers-settings[better-headers-xxp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site scripting attacks by setting the <strong>X-XSS-Protection</strong> header';
 }
 
 //defined output for settings
 function better_head_xpcdp() {
   $settings = get_option('better-headers-settings');
-  $checked = ($settings['better-headers-xpcdp']==="YES" ? " checked" : "");
+  $checked = (isset($settings['better-headers-xpcdp']) && $settings['better-headers-xpcdp']==="YES" ? " checked" : "");
   echo '<label><input id="better-headers-xpcdp" name="better-headers-settings[better-headers-xpcdp]" type="checkbox" value="YES"' . $checked . '> Protect against cross site Flash attacks by setting the <strong>X-Permitted-Cross-Domain-Policies</strong> header';
 }
 
