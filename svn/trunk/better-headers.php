@@ -235,7 +235,7 @@ function better_head_show_settings() {
   echo '<div class="wrap">';
   echo '  <div style="padding:12px;background-color:white;margin:24px 0;">';
   echo '    <a href="https://bettersecurity.co" target="_blank" style="display:inline-block;width:100%;">';
-  echo '      <img src="' . WP_PLUGIN_URL . '/better-headers/header.png" style="height:64px;">';
+  echo '      <img src="' . plugins_url('header.png', __FILE__) . '" style="height:64px;">';
   echo '    </a>';
   echo '  </div>';
   echo '  <div style="margin:0 0 24px 0;">';
