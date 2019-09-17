@@ -802,9 +802,18 @@ function better_head_links($links) {
 	return $links;
 }
 
+//show Pro link
+function better_head_meta($links, $file) {
+	if($file===plugin_basename(__FILE__)) {
+		$links[] = '<a href="plugin-install.php?tab=plugin-information&plugin=better-security-pro&TB_iframe=true&width=600&height=550"><em><strong>' . __('Check out Better Security Pro', 'better-head-text') . '</strong></em></a>';
+	}
+	return $links;
+}
+
 //add actions
 if(is_admin()) {
-  add_filter('plugin_action_links_'.plugin_basename(__FILE__),'better_head_links');
+  add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'better_head_links');
+  add_filter('plugin_row_meta', 'better_head_meta', 10, 2);
 }
 
 /*
