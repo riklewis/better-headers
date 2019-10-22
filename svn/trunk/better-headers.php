@@ -309,7 +309,7 @@ function better_head_show_settings() {
     echo '      </tr>';
     $boo = true;
   }
-  if(isset($settings['better-headers-xpcdp']) && $settings['better-headers-xpdcp']!=="") {
+  if(isset($settings['better-headers-xpcdp']) && $settings['better-headers-xpcdp']!=="") {
     echo '      <tr>';
     echo '        <th scope="row">X-Permitted-Cross-Domain-Policies</th>';
     echo '        <td>none</td>';
