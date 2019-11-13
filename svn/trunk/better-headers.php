@@ -240,6 +240,12 @@ function better_head_show_settings() {
   echo '  </div>';
   echo '  <div style="margin:0 0 24px 0;">';
   echo '    <a href="https://www.php.net/supported-versions.php" target="_blank"><img src="' . better_head_badge_php() . '"></a>';
+  if(better_head_dbtype()==='MYSQL') {
+    echo ' &nbsp; <a href="https://www.fromdual.com/support-for-mysql-from-oracle" target="_blank"><img src="' . better_head_badge_mysql() . '"></a>';
+	}
+	else {
+		echo ' &nbsp; <a href="https://www.fromdual.com/support-for-mysql-from-oracle" target="_blank"><img src="' . better_head_badge_maria() . '"></a>';
+	}
   echo '  </div>';
   echo '  <h1>' . __('Better Headers', 'better-head-text') . '</h1>';
   echo '  <form action="options.php" method="post">';
@@ -341,6 +347,45 @@ function better_head_badge_php() {
 
 function better_head_phpversion() {
 	return explode('-',phpversion())[0]; //trim any extra information
+}
+
+function better_head_dbtype() {
+	global $wpdb;
+	$vers = $wpdb->get_var("SELECT VERSION() as mysql_version");
+	if(stripos($vers,'MARIA')!==false) {
+		return 'MARIA';
+	}
+	return 'MYSQL';
+}
+
+function better_head_dbversion() {
+	global $wpdb;
+	$vers = $wpdb->get_var("SELECT VERSION() as mysql_version");
+  return explode('-',$vers)[0]; //trim any extra information
+}
+
+function better_head_badge_mysql() {
+  $ver = better_head_dbversion();
+  $col = "critical";
+  if(version_compare($ver,'5.6','>=')) {
+    $col = "important";
+  }
+  if(version_compare($ver,'5.7','>=')) {
+    $col = "success";
+  }
+  return 'https://img.shields.io/badge/MySQL-' . $ver . '-' . $col . '.svg?logo=mysql&style=for-the-badge';
+}
+
+function better_head_badge_maria() {
+  $ver = better_head_dbversion();
+  $col = "critical";
+  if(version_compare($ver,'10.0','>=')) {
+    $col = "important";
+  }
+  if(version_compare($ver,'10.1','>=')) {
+    $col = "success";
+  }
+  return 'https://img.shields.io/badge/MariaDB-' . $ver . '-' . $col . '.svg?logo=mariadb&style=for-the-badge';
 }
 
 //define output for settings section
