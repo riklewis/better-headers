@@ -862,7 +862,7 @@ function better_head_meta($links, $file) {
 //add actions
 if(is_admin()) {
   add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'better_head_links');
-  add_filter('plugin_row_meta', 'better_head_meta', 10, 2);
+  //add_filter('plugin_row_meta', 'better_head_meta', 10, 2);
 }
 
 /*
