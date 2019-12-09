@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Better Headers
 Description:  Improve the security of your website by easily setting HTTP response headers to enable browser protection
-Version:      1.6
+Version:      2.0
 Author:       Better Security
 Author URI:   https://bettersecurity.co
 License:      GPL3
@@ -862,7 +862,7 @@ function better_head_meta($links, $file) {
 //add actions
 if(is_admin()) {
   add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'better_head_links');
-  //add_filter('plugin_row_meta', 'better_head_meta', 10, 2);
+  add_filter('plugin_row_meta', 'better_head_meta', 10, 2);
 }
 
 /*
